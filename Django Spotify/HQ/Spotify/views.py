@@ -1,27 +1,18 @@
 from django.shortcuts import render
-from .models import Song, Playlist, Artist
+from .models import Song, Artist
 from django.db.models import Q
 from .forms import RegisterForm, LoginForm, PlaylistForm
 from django.shortcuts import get_object_or_404, redirect ,render
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
 # Create your views here.
 
+def defult(request):
+    return render(request, 'Defult.html')
 
-def Home_page(request):
-    songs = Song.objects.all()
-    play_song_id = request.GET.get('play', None)
-    play_song = None
-
-    if play_song_id:
-        play_song = get_object_or_404(Song, id=play_song_id)
-
-
-    return render(request, 'home.html', {'songs':songs, 'play_song':play_song})
-
-
-
+@login_required
 def index(request):
     tracks = Song.objects.all()
     Artists = Artist.objects.all()
@@ -40,9 +31,9 @@ def login_view(request):
             else:
                 form.add_error(None, "Invalid username or password")
     else:
-        return render(request, 'main/login.html')   
+        return render(request, 'registration/login.html')   
        
-    return render(request, 'main/login.html', {'form':form})
+    return render(request, 'registration/login.html', {'form':form})
 
 def signup_view(request):
     if request.method == "POST":
@@ -53,13 +44,13 @@ def signup_view(request):
             password = form.cleaned_data['password']
 
             User.objects.create_user(username=username, email=email, password=password)
-            return redirect('index')
+            return redirect('login')
     else:
         form = RegisterForm()
 
+    return render(request, 'registration/signup.html', {'form':form})
 
-    return render(request, 'main/signup.html', {'form':form})
-
+@login_required
 def search_view(request):
     if request.method == "POST":
         searched = request.POST['searched']
@@ -69,7 +60,7 @@ def search_view(request):
     else: 
         return render(request, 'main/search.html',{'tracks': [], 'search_results_count': 0, 'user': request.user})
 
-
+@login_required
 def musicPlayer_view(request, track_id):
     play = get_object_or_404(Song, id=track_id)
 
@@ -82,7 +73,7 @@ def musicPlayer_view(request, track_id):
 
     return render(request, 'main/music.html', {'play':play, 'play_song':play_song})
 
-
+@login_required
 def createPlaylist_view(request):
     if request.method == "POST":
         form = PlaylistForm(request.POST)
@@ -96,7 +87,7 @@ def createPlaylist_view(request):
         form = PlaylistForm()
     return render(request, 'main/createPlaylist.html', {'form': form})
 
-
+@login_required
 def playlist_view(request, artist_id):
     path = get_object_or_404(Artist, id=artist_id)
     tracks = Song.objects.filter(artist=path) # Get all songs for this artist  

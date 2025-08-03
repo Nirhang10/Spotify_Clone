@@ -31,16 +31,3 @@ class PlaylistForm(forms.ModelForm):
     class Meta:
         model = Playlist
         fields = ('name', 'song')
-
-
-class userRegistrationForm(UserCreationForm):
-    email = forms.EmailField()
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password1', 'password2')
-        lables = {
-            'username':'Username',
-            'email':'Email',
-            'password1':'Passwordqq',
-            'password2':'Repeat Password'
-        }
